@@ -37,3 +37,7 @@ class VerificationError(LLMSecError):
 
 class CanaryError(LLMSecError):
     """Raised when canary generation, seeding, or session operations fail."""
+
+
+class IntegrationError(LLMSecError):
+    """Raised when an external tool integration (e.g., Garak) is missing or fails."""
