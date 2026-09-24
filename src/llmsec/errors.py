@@ -27,10 +27,6 @@ class LLMSecConnectionError(LLMSecError):
     """Raised when connection to target LLM endpoint fails or times out."""
 
 
-class TargetConnectionError(LLMSecConnectionError):
-    """Raised when connection to target LLM endpoint fails or times out."""
-
-
 class TargetResponseError(LLMSecError):
     """Raised when the target endpoint returns an unparseable or error response."""
 

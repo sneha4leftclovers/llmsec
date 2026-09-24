@@ -14,8 +14,8 @@ from llmsec.config import (
 from llmsec.errors import (
     AuthorizationError,
     ConfigurationError,
+    LLMSecConnectionError,
     LLMSecError,
-    TargetConnectionError,
     TargetResponseError,
     VerificationError,
 )
@@ -239,6 +239,6 @@ class TestErrors:
     def test_error_hierarchy(self) -> None:
         assert issubclass(ConfigurationError, LLMSecError)
         assert issubclass(AuthorizationError, LLMSecError)
-        assert issubclass(TargetConnectionError, LLMSecError)
+        assert issubclass(LLMSecConnectionError, LLMSecError)
         assert issubclass(TargetResponseError, LLMSecError)
         assert issubclass(VerificationError, LLMSecError)

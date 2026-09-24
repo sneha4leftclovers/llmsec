@@ -2,7 +2,7 @@
 
 from enum import Enum
 from typing import Any
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from pydantic import BaseModel, Field, HttpUrl, field_validator, model_validator
 
 
 class HttpMethod(str, Enum):
@@ -48,7 +48,14 @@ class Identity(BaseModel):
     Essential for testing BOLA/IDOR cross-user and cross-tenant boundaries.
     """
 
-    name: str = Field(description="Logical name or label for this identity (e.g. 'tenant_a', 'victim_user').")
+    name: str = Field(
+        default="",
+        description="Logical name or label for this identity (e.g. 'tenant_a', 'victim_user').",
+    )
+    identity_id: str | None = Field(
+        default=None,
+        description="Unique identifier for this identity (e.g. 'tenant_a', 'user_1').",
+    )
     headers: dict[str, str] = Field(
         default_factory=dict,
         description="HTTP headers specific to this identity (e.g. tenant-specific session tokens or API keys).",
@@ -62,12 +69,22 @@ class Identity(BaseModel):
         description="Optional user identifier associated with this test profile.",
     )
 
+    @model_validator(mode="after")
+    def _resolve_identity_identifiers(self) -> "Identity":
+        if not self.identity_id:
+            self.identity_id = self.name or self.user_id or self.tenant_id or "identity"
+        if not self.name:
+            self.name = self.identity_id
+        return self
+
 
 TestIdentityConfig = Identity
 
 
 class TestIdentitiesConfig(BaseModel):
     """Pair of test identities used to evaluate multi-tenant and authorization boundaries."""
+
+    __test__ = False
 
     primary_identity: Identity = Field(
         default_factory=lambda: Identity(name="primary_identity"),
@@ -77,6 +94,16 @@ class TestIdentitiesConfig(BaseModel):
         default=None,
         description="Secondary test identity for cross-boundary/BOLA exfiltration tests.",
     )
+
+    @property
+    def primary(self) -> Identity:
+        """Alias property for primary_identity."""
+        return self.primary_identity
+
+    @property
+    def secondary(self) -> Identity | None:
+        """Alias property for secondary_identity."""
+        return self.secondary_identity
 
 
 class CanaryConfig(BaseModel):
@@ -160,7 +187,7 @@ class LLMSecConfig(BaseModel):
         default_factory=ResponseExtractionConfig,
         description="Configuration for extracting textual response from API response body.",
     )
-    identities: TestIdentitiesConfig = Field(
+    identities: TestIdentitiesConfig | None = Field(
         default_factory=TestIdentitiesConfig,
         description="Identity configurations for single-user or cross-tenant evaluation.",
     )
@@ -243,3 +270,8 @@ class LLMSecConfig(BaseModel):
     def response_extraction_path(self) -> str:
         """Alias property for response_extraction.json_path."""
         return self.response_extraction.json_path
+
+    @property
+    def test_identities(self) -> TestIdentitiesConfig | None:
+        """Alias property for identities."""
+        return self.identities

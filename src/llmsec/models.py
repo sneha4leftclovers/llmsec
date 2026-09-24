@@ -224,3 +224,20 @@ class ProbeResponse(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         description="UTC timestamp when the probe response was recorded.",
     )
+
+
+class AuthzFinding(BaseModel):
+    """Finding representing cross-identity authorization or tenant boundary leakage."""
+
+    run_id: str
+    probe_prompt: str
+    requesting_identity_id: str
+    leaking_identity_id: str
+    canary_finding: CanaryFinding
+    probe_request: ProbeRequest
+    probe_response: ProbeResponse
+    owasp_category: OWASPCategory
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="UTC timestamp when the authorization finding was recorded.",
+    )
