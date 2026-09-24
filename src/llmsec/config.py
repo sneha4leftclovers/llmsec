@@ -63,6 +63,9 @@ class Identity(BaseModel):
     )
 
 
+TestIdentityConfig = Identity
+
+
 class TestIdentitiesConfig(BaseModel):
     """Pair of test identities used to evaluate multi-tenant and authorization boundaries."""
 
@@ -221,3 +224,22 @@ class LLMSecConfig(BaseModel):
         if identity and identity.headers:
             headers.update(identity.headers)
         return headers
+
+    def effective_headers(self, identity: Identity | None = None) -> dict[str, str]:
+        """Alias for to_effective_headers."""
+        return self.to_effective_headers(identity)
+
+    @property
+    def request_body_template(self) -> dict[str, Any]:
+        """Alias property for body_template."""
+        return self.body_template
+
+    @property
+    def timeout_seconds(self) -> float:
+        """Alias property for timeout in seconds."""
+        return self.timeout
+
+    @property
+    def response_extraction_path(self) -> str:
+        """Alias property for response_extraction.json_path."""
+        return self.response_extraction.json_path

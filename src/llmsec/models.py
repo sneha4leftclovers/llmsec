@@ -197,3 +197,30 @@ class CanaryFinding(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         description="UTC timestamp of the finding detection.",
     )
+
+
+class ProbeRequest(BaseModel):
+    """Rendered probe request model sent over the wire."""
+
+    url: str
+    method: str
+    headers: dict[str, str]
+    body: dict
+    prompt: str
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="UTC timestamp when the probe request was created.",
+    )
+
+
+class ProbeResponse(BaseModel):
+    """Probe response model containing raw telemetry and extracted model text."""
+
+    status_code: int
+    raw_body: str
+    extracted_text: str | None
+    latency_ms: float
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="UTC timestamp when the probe response was recorded.",
+    )

@@ -23,7 +23,11 @@ class AuthorizationError(LLMSecError):
     """Raised when authorization acknowledgment is missing, invalid, or target is unauthorized."""
 
 
-class TargetConnectionError(LLMSecError):
+class LLMSecConnectionError(LLMSecError):
+    """Raised when connection to target LLM endpoint fails or times out."""
+
+
+class TargetConnectionError(LLMSecConnectionError):
     """Raised when connection to target LLM endpoint fails or times out."""
 
 
