@@ -33,3 +33,7 @@ class TargetResponseError(LLMSecError):
 
 class VerificationError(LLMSecError):
     """Raised when verification, canary generation, or detection encounters an error."""
+
+
+class CanaryError(LLMSecError):
+    """Raised when canary generation, seeding, or session operations fail."""

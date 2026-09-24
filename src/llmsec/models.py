@@ -183,3 +183,17 @@ class Finding(BaseModel):
                 "Canary-verified deterministic finding must include the matched canary token in evidence."
             )
         return self
+
+
+class CanaryFinding(BaseModel):
+    """Specific canary detection finding resulting from scanning a response string."""
+
+    run_id: str = Field(description="Unique run ID of the CanarySession.")
+    label: str = Field(description="Label identifying what seed content was tagged.")
+    token: str = Field(description="Exact canary token string.")
+    matched_in_response: str = Field(description="The full response text in which the token was detected.")
+    finding_index: int = Field(description="Character position/offset of match in response.")
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="UTC timestamp of the finding detection.",
+    )
