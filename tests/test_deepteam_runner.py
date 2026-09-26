@@ -189,7 +189,11 @@ def test_run_executes_red_team_and_collects_findings(monkeypatch: pytest.MonkeyP
         MockRTResult(vulnerability_type="robustness", score=1.0),  # passed -> ignored
     ]
 
-    with patch("deepteam.red_team", return_value=mock_assessment):
+    mock_red_team = MagicMock(return_value=mock_assessment)
+    mock_deepteam = MagicMock()
+    mock_deepteam.red_team = mock_red_team
+
+    with patch.dict("sys.modules", {"deepteam": mock_deepteam, "deepteam.red_team": mock_red_team}):
         findings = runner.run()
         assert len(findings) == 2
         categories = {f.owasp_category for f in findings}

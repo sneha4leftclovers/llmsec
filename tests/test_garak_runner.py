@@ -179,7 +179,12 @@ def test_run_executes_garak_and_returns_findings() -> None:
         with open(report_path, "w", encoding="utf-8") as f:
             f.write(json.dumps(fake_eval_hit) + "\n")
 
-    with patch("garak.cli.main", side_effect=mock_cli_main):
+    mock_cli = MagicMock()
+    mock_cli.main.side_effect = mock_cli_main
+    mock_garak = MagicMock()
+    mock_garak.cli = mock_cli
+
+    with patch.dict("sys.modules", {"garak": mock_garak, "garak.cli": mock_cli}):
         findings = runner.run()
         assert len(findings) == 1
         assert findings[0].verification_status == VerificationStatus.MODEL_JUDGED
