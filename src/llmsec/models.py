@@ -241,3 +241,32 @@ class AuthzFinding(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         description="UTC timestamp when the authorization finding was recorded.",
     )
+
+
+class ScanResult(BaseModel):
+    """Complete result of a Scanner.run() execution."""
+
+    run_id: str = Field(description="Unique run identifier matching the CanarySession run_id.")
+    config_target_url: str = Field(description="Target URL from the assessment configuration.")
+    started_at: datetime = Field(description="UTC timestamp when the scan started.")
+    completed_at: datetime = Field(description="UTC timestamp when the scan completed.")
+    findings: list[Finding] = Field(
+        default_factory=list,
+        description="Full Finding objects converted from confirmed canary detections.",
+    )
+    authz_findings: list[AuthzFinding] = Field(
+        default_factory=list,
+        description="AuthzFinding objects from the two-identity authorization suite.",
+    )
+    canary_findings: list[CanaryFinding] = Field(
+        default_factory=list,
+        description="Raw CanaryFinding objects from canary probe scanning.",
+    )
+    errors: list[str] = Field(
+        default_factory=list,
+        description="Non-fatal error messages collected during the scan run.",
+    )
+    skipped_suites: list[str] = Field(
+        default_factory=list,
+        description="Test suite names that were skipped due to missing configuration.",
+    )
