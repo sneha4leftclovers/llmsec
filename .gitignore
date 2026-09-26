@@ -35,4 +35,5 @@ Thumbs.db
 reports/
 *.pdf
 *.html
+!src/llmsec/templates/*.html
 canary_state.json

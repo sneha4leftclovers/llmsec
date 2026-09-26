@@ -200,6 +200,16 @@ class TestJudgeExecution:
         assert result.verification_status == VerificationStatus.CONFIRMED_DETERMINISTIC
         assert result is not finding
 
+    def test_llm02_and_llm08_skipped_without_http_call(self) -> None:
+        judge = OllamaJudge()
+        response = _create_sample_probe_response()
+        for cat in (OWASPCategory.LLM02, OWASPCategory.LLM08):
+            finding = _create_sample_inconclusive_finding(category=cat)
+            with patch("httpx.Client.post") as mock_post:
+                result = judge.judge(finding, response, cat)
+                assert not mock_post.called
+            assert result.verification_status == VerificationStatus.INCONCLUSIVE
+
     def test_judge_never_sets_confirmed_deterministic(self) -> None:
         judge = OllamaJudge()
         finding = _create_sample_inconclusive_finding()

@@ -41,3 +41,8 @@ class CanaryError(LLMSecError):
 
 class IntegrationError(LLMSecError):
     """Raised when an external tool integration (e.g., Garak) is missing or fails."""
+
+
+class ReportError(LLMSecError):
+    """Raised when report generation or rendering fails."""
+

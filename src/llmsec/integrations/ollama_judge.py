@@ -92,6 +92,14 @@ class OllamaJudge:
         if finding.verification_status != VerificationStatus.INCONCLUSIVE:
             return finding.model_copy(deep=True)
 
+        # Categories requiring deterministic canary verification are skipped
+        if category in (OWASPCategory.LLM02, OWASPCategory.LLM08):
+            logger.info(
+                "Category %s requires deterministic canary verification; skipping probabilistic model judge.",
+                category.value,
+            )
+            return finding.model_copy(deep=True)
+
         target_text = (
             response.extracted_text
             if response.extracted_text is not None

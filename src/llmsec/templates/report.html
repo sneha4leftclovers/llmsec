@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LLMSec Security Assessment Report</title>
+<style>
+  @page {
+    size: A4;
+    margin: 20mm;
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-size: 8.5pt;
+      color: #718096;
+    }
+  }
+  @page:first {
+    @bottom-right {
+      content: "";
+    }
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #2d3748;
+    line-height: 1.5;
+    font-size: 10pt;
+    margin: 0;
+  }
+  .cover-page {
+    page-break-after: always;
+    padding-top: 60px;
+    text-align: center;
+  }
+  .cover-title {
+    font-size: 28pt;
+    font-weight: 800;
+    color: #1a202c;
+    margin-bottom: 8px;
+  }
+  .cover-subtitle {
+    font-size: 14pt;
+    color: #4a5568;
+    margin-bottom: 40px;
+  }
+  .cover-meta {
+    margin: 0 auto;
+    width: 80%;
+    text-align: left;
+    border-top: 2px solid #e2e8f0;
+    padding-top: 20px;
+  }
+  .cover-meta table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .cover-meta td {
+    padding: 8px 12px;
+    border: none;
+    font-size: 10pt;
+  }
+  .cover-meta td.label {
+    font-weight: 600;
+    color: #4a5568;
+    width: 35%;
+  }
+
+  h1 { font-size: 18pt; color: #1a202c; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-top: 24px; margin-bottom: 12px; }
+  h2 { font-size: 13pt; color: #2b6cb0; margin-top: 20px; margin-bottom: 8px; border-bottom: 1px solid #edf2f7; padding-bottom: 4px; }
+  h3 { font-size: 11pt; color: #2d3748; margin-top: 12px; margin-bottom: 6px; }
+
+  .meta-table, .findings-table, .coverage-table, .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    margin-bottom: 16px;
+  }
+  th, td {
+    padding: 6px 10px;
+    text-align: left;
+    border: 1px solid #e2e8f0;
+    font-size: 9pt;
+  }
+  th {
+    background-color: #f7fafc;
+    color: #4a5568;
+    font-weight: 600;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 8pt;
+    font-weight: 600;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .badge-critical { background-color: #fed7d7; color: #9b2c2c; }
+  .badge-high { background-color: #feebc8; color: #9c4221; }
+  .badge-medium { background-color: #fefcbf; color: #744210; }
+  .badge-low { background-color: #c6f6d5; color: #22543d; }
+  .badge-informational { background-color: #e2e8f0; color: #4a5568; }
+  .badge-det { background-color: #bee3f8; color: #2b6cb0; border: 1px solid #90cdf4; }
+  .badge-model { background-color: #e9d8fd; color: #6b46c1; border: 1px solid #d6bcfa; }
+  .badge-inconclusive { background-color: #edf2f7; color: #718096; }
+
+  .alert-box {
+    background-color: #ebf8ff;
+    border-left: 4px solid #3182ce;
+    padding: 10px;
+    margin: 12px 0;
+    font-size: 9.5pt;
+  }
+  .finding-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 16px;
+    page-break-inside: avoid;
+  }
+  .evidence-block {
+    background-color: #f7fafc;
+    border: 1px solid #edf2f7;
+    border-radius: 4px;
+    padding: 8px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 8.5pt;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin-top: 6px;
+  }
+  .opinion-notice {
+    font-size: 8.5pt;
+    font-style: italic;
+    color: #805ad5;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Section 1: Cover Page -->
+<div class="cover-page">
+  <div class="cover-title">llmsec</div>
+  <div class="cover-subtitle">LLM Application Security Assessment Report</div>
+  <div class="cover-meta">
+    <table>
+      <tr>
+        <td class="label">Target Endpoint:</td>
+        <td>{{ target_url }}</td>
+      </tr>
+      <tr>
+        <td class="label">Assessment Date:</td>
+        <td>{{ generation_time }}</td>
+      </tr>
+      <tr>
+        <td class="label">Tool & Version:</td>
+        <td>llmsec v{{ tool_version }}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- Section 2: Executive Summary -->
+<h1>1. Executive Summary</h1>
+<div class="alert-box">
+  <strong>Risk Assessment:</strong> {{ narrative }}
+</div>
+
+<p><strong>Findings Overview by Severity:</strong></p>
+<table class="summary-table" style="width: 70%;">
+  <thead>
+    <tr>
+      <th>Severity</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="badge badge-critical">Critical</span></td>
+      <td><strong>{{ severity_counts.critical }}</strong></td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-high">High</span></td>
+      <td><strong>{{ severity_counts.high }}</strong></td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-medium">Medium</span></td>
+      <td><strong>{{ severity_counts.medium }}</strong></td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-low">Low</span></td>
+      <td><strong>{{ severity_counts.low }}</strong></td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-informational">Informational</span></td>
+      <td><strong>{{ severity_counts.informational }}</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Total Findings</strong></td>
+      <td><strong>{{ findings|length }}</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Section 3: Scope and Methodology -->
+<h1>2. Scope and Methodology</h1>
+<p style="font-size: 9pt; color: #4a5568;">
+  This assessment was conducted using black-box testing methodologies.
+  Black-box testing cannot evaluate supply chain integrity (LLM03) or pre-deployment data and model poisoning (LLM04).
+  Partial coverage is available for output handling (LLM05), excessive agency (LLM06), vector weaknesses (LLM08), and unbounded consumption (LLM10).
+</p>
+
+<h2>OWASP Top 10 Coverage Matrix</h2>
+<table class="coverage-table">
+  <thead>
+    <tr>
+      <th>OWASP Category</th>
+      <th>Black-Box Capability</th>
+      <th>Execution Status</th>
+      <th>Findings Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in coverage_matrix %}
+    <tr>
+      <td><strong>{{ row.code }}</strong>: {{ row.label }}</td>
+      <td>{{ row.capability }}</td>
+      <td>
+        {% if row.status == "not applicable (black-box)" %}
+          <span style="color: #718096; font-style: italic;">not applicable (black-box)</span>
+        {% else %}
+          <span style="color: #a0aec0;">run status not recorded</span>
+        {% endif %}
+      </td>
+      <td>{{ row.findings_count }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Assessment Parameters</h2>
+<table class="meta-table">
+  <tr>
+    <th style="width: 30%;">First to last finding recorded</th>
+    <td>{{ testing_period }}</td>
+  </tr>
+  <tr>
+    <th>Authorization Statement</th>
+    <td>{{ auth_statement }}</td>
+  </tr>
+</table>
+
+<!-- Section 4: Findings -->
+<h1>3. Security Findings ({{ findings|length }})</h1>
+{% if findings|length == 0 %}
+  <p><em>no findings recorded in the tested categories</em></p>
+{% else %}
+  {% for f in findings %}
+  <div class="finding-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <h3 style="margin: 0;">{{ f.title }}</h3>
+      <div>
+        <span class="badge badge-{{ f.severity.value }}">{{ f.severity.value }}</span>
+        {% if f.is_deterministic %}
+          <span class="badge badge-det">CONFIRMED DETERMINISTIC</span>
+        {% elif f.is_model_judged %}
+          <span class="badge badge-model">MODEL JUDGED</span>
+        {% else %}
+          <span class="badge badge-inconclusive">{{ f.verification_status.value }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <table style="width: 100%; border: none; margin-bottom: 8px;">
+      <tr>
+        <td style="border: none; padding: 2px 0; width: 25%;"><strong>Finding ID:</strong> {{ f.id }}</td>
+        <td style="border: none; padding: 2px 0; width: 35%;"><strong>OWASP Category:</strong> {{ f.owasp_category.value }}</td>
+        <td style="border: none; padding: 2px 0; width: 40%;"><strong>Verification Status:</strong> {{ f.verification_status.value }} ({{ f.verification_method.value }})</td>
+      </tr>
+      {% if f.affected_identity %}
+      <tr>
+        <td colspan="3" style="border: none; padding: 2px 0;"><strong>Affected Identity:</strong> {{ f.affected_identity }}</td>
+      </tr>
+      {% endif %}
+    </table>
+
+    <div style="margin-top: 6px;">
+      <strong>Summary:</strong> {{ f.evidence.summary }}
+    </div>
+
+    {% if f.evidence.matched_canary %}
+    <div style="margin-top: 6px; color: #2b6cb0;">
+      <strong>Matched Canary Token:</strong> <code>{{ f.evidence.matched_canary }}</code>
+      {% if f.evidence.canary_leak_offset is not none %}
+        (Offset: {{ f.evidence.canary_leak_offset }})
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% if f.is_model_judged and (f.evidence.details.get("judge_verdict") or f.evidence.details.get("judge_raw_output")) %}
+    <div style="margin-top: 6px;">
+      <strong>Model Verdict Summary:</strong> {{ f.evidence.details.get("judge_verdict", "N/A") }}
+      {% if f.evidence.details.get("judge_raw_output") %}
+        (Raw: <code>{{ f.evidence.details.get("judge_raw_output") }}</code>)
+      {% endif %}
+      <div class="opinion-notice">Note: model opinion, not deterministic proof.</div>
+    </div>
+    {% endif %}
+
+    {% if f.evidence.raw_evidence %}
+    <div style="margin-top: 8px;">
+      <strong>Observed Evidence:</strong>
+      <div class="evidence-block">{{ f.evidence.raw_evidence }}</div>
+    </div>
+    {% endif %}
+
+    {% if f.reproduction_steps %}
+    <div style="margin-top: 8px;">
+      <strong>Reproduction Steps:</strong>
+      <ol style="margin-top: 4px; padding-left: 20px;">
+        {% for step in f.reproduction_steps %}
+        <li>{{ step }}</li>
+        {% endfor %}
+      </ol>
+    </div>
+    {% endif %}
+
+    {% if f.remediation %}
+    <div style="margin-top: 8px;">
+      <strong>Remediation:</strong> {{ f.remediation }}
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+{% endif %}
+
+<!-- Section 5: Appendix -->
+<h1>4. Appendix</h1>
+<table class="meta-table">
+  <tr>
+    <th style="width: 25%;">Run ID</th>
+    <td>{{ run_id }}</td>
+  </tr>
+  <tr>
+    <th>Tool Versions</th>
+    <td>{{ tool_versions }}</td>
+  </tr>
+  <tr>
+    <th>Executed Probes</th>
+    <td>{{ probe_list }}</td>
+  </tr>
+</table>
+
+</body>
+</html>
