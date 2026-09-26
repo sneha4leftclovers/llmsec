@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-09-26
+
+### Added
+- `llmsec init` command generating a commented example YAML config file
+- `llmsec scan` command wired to load config, run canary and authorization test suites, save JSON results, and optionally generate an HTML report
+- `llmsec report` command loading a scan result JSON and rendering HTML or PDF via ReportGenerator
+- `config_loader.py` with YAML config loading and human-readable Pydantic validation errors
+- `scanner.py` with Scanner class and ScanResult model
+
+### Changed
+- CLI scan and report commands replaced with working implementations.
+
 ## [0.1.0] - 2026-09-24
 
 ### Added
